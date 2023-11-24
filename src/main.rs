@@ -28,9 +28,8 @@ pub mod claws {
 
             if let Some(pcap_files) = Self::get_pcap_files() {
                 let mut sel_view = SelectView::<PathBuf>::new();
-                for e in pcap_files.into_iter() {
-                    let f_name = e.file_name().unwrap().to_str().unwrap_or("BadName").to_string();
-                    sel_view.add_item(f_name, e);
+                for (f_name, path) in pcap_files.into_iter() {
+                    sel_view.add_item(f_name, path);
                 }
                 let main_layout = LinearLayout::vertical()
                     .child(sel_view)
@@ -45,8 +44,31 @@ pub mod claws {
             s.run();
         }
 
-        fn get_pcap_files() -> Option<Vec<PathBuf>> {
-            //TODO
+        /// Finds `pcap` and `cap` files and returns a vector where each element consists of a
+        /// tuple containing the file's name and the path to the file.
+        fn get_pcap_files() -> Option<Vec<(String, PathBuf)>> {
+            std::env::current_dir()
+                .ok()
+                .and_then(|asset_dir| {
+                    fs::read_dir(&asset_dir)
+                        .ok()
+                        .map(|dir| {
+                            dir.filter_map(|entry| {
+                                entry.ok().and_then(|e| {
+                                    if e.file_type().map_or(false, |ft| ft.is_file()) {
+                                        e.file_name()
+                                            .to_str()
+                                            .filter(|file_name| file_name.ends_with("pcap") || file_name.ends_with("cap"))
+                                            .map(|file_name| (file_name.to_string(), e.path()))
+                                    } else {
+                                        None
+                                    }
+                                })
+                            })
+                                .collect::<Vec<(String, PathBuf)>>()
+                        })
+                })
+                .filter(|n_p| !n_p.is_empty())
         }
 
         fn read_file(&mut self) {
