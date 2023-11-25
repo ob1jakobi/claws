@@ -116,12 +116,14 @@ pub mod claws {
 
         /// Takes the file that's provided and parses the contents of the packet capture file.
         fn read_file(s: &mut Cursive, file: &PathBuf) {
+            // TODO: add the actual program logic
             let msg: String = format!("You've chosen the read_file function with path: {:?}", file);
             s.add_layer(Dialog::info(msg))
         }
 
         /// Makes a new capture on a given interface.
         fn new_capture(s: &mut Cursive, capture_type: &str) {
+            // TODO: add the actual program logic
             let msg: String = format!("You've chosen the new_capture function on capture type: {}", capture_type);
             s.add_layer(Dialog::info(msg))
         }
